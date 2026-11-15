@@ -28,7 +28,7 @@ for json_file in "$input_dir"/*.json; do
 
     rel_json="$(realpath --relative-to="$script_dir" "$json_file")"
     rel_out="$(realpath -m --relative-to="$script_dir" "$output_dir")"
-    ( cd "$script_dir" && jq -f filter.jq "$rel_json" > "$rel_out/$name.csv" )
+    ( cd "$script_dir" && jq -r -f filter.jq "$rel_json" > "$rel_out/$name.csv" )
 done
 
 echo "Готово: CSV-файлы записаны в '$output_dir'"
