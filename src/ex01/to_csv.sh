@@ -1,36 +1,34 @@
 #!/bin/bash
-# to_csv.sh — преобразует сырые JSON-файлы MOEX в CSV
-# Использование: ./to_csv.sh <директория с JSON-файлами>
+set -euo pipefail
 
-set -u
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-
-if [ $# -ne 1 ]; then
-    echo "Использование: $0 <директория с JSON-файлами>" >&2
+if [ $# -lt 1 ]; then
+    echo "Использование: $0 <директория с .json> [директория вывода]" >&2
     exit 1
 fi
 
-SRC_DIR="$1"
-if [ ! -d "$SRC_DIR" ]; then
-    echo "Ошибка: '$SRC_DIR' не является директорией" >&2
+input_dir="$1"
+output_dir="${2:-csv_data}"
+
+if [ ! -d "$input_dir" ]; then
+    echo "Ошибка: директория '$input_dir' не найдена" >&2
     exit 1
 fi
 
-# Переходим в папку скрипта, чтобы jq работал с короткими путями
-cd "$SCRIPT_DIR" || exit 1
-mkdir -p csv_data
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+mkdir -p "$output_dir"
 
-for f in "$SRC_DIR"/*.json; do
-    [ -e "$f" ] || { echo "В '$SRC_DIR' нет JSON-файлов" >&2; exit 1; }
+for json_file in "$input_dir"/*.json; do
+    if [ ! -e "$json_file" ]; then
+        echo "Ошибка: в '$input_dir' нет .json файлов" >&2
+        exit 1
+    fi
 
-    name=$(basename "$f" .json)
+    name="$(basename "$json_file" .json)"
     name="${name%_raw}"
 
-    jq -r -f filter.jq "$f" > "csv_data/${name}.csv" \
-        && echo "$name — ok" \
-        || echo "Ошибка преобразования: $f" >&2
+    rel_json="$(realpath --relative-to="$script_dir" "$json_file")"
+    rel_out="$(realpath -m --relative-to="$script_dir" "$output_dir")"
+    ( cd "$script_dir" && jq -f filter.jq "$rel_json" > "$rel_out/$name.csv" )
 done
 
-echo "Готово: CSV лежат в csv_data/"
+echo "Готово: CSV-файлы записаны в '$output_dir'"
