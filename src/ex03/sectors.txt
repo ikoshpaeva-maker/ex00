@@ -1,0 +1,21 @@
+LKOH	Нефть и газ
+ROSN	Нефть и газ
+TATN	Нефть и газ
+TRNFP	Нефть и газ
+SNGS	Нефть и газ
+SBER	Банки
+VTB	Банки
+SBOM	Банки
+GZPR	Энергетика
+AQUA	Потребительские товары
+PHOR	Химия
+GCHE	Химия
+ASTR	Потребительские товары
+RAGR	Потребительские товары
+VKCO	IT
+T	IT
+SVCB	IT
+YDEX	IT
+LKID	Энергетика
+BAZA	IT
+IVAT	IT
