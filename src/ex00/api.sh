@@ -17,6 +17,7 @@ mkdir -p "$OUT_DIR"
 for ticker in "$@"; do
     file="${OUT_DIR}/${ticker}.csv"
     json_file="${OUT_DIR}/${ticker}_raw.json"   # <-- создаём переменную
+    pages_file="${OUT_DIR}/${ticker}_pages.json"
     echo "Загружаю ${ticker} -> ${file}"
 
     # Пишем заголовок CSV
@@ -32,7 +33,7 @@ for ticker in "$@"; do
         fi
 
         # Сохраняем сырой JSON в файл через переменную
-        echo "$resp" > "$json_file"               # <-- используем переменную
+        echo "$resp" >> "$pages_file"              # <-- используем переменную
 
         echo "$resp" | jq -r '
             .history.columns as $c
@@ -45,13 +46,18 @@ for ticker in "$@"; do
                 .[($c|index("VOLUME"))] ]
             | @csv' >> "$file"
 
-        next=$(echo "$resp" | jq -r '."history.cursor".NEXT // -1')
-        if [ "$next" = "-1" ]; then
+       count=$(echo "$resp" | jq '.history.data | length')
+        if [ "$count" -lt 100 ]; then
             break
         fi
-        start=$next
+        start=$((start + 100))
+        sleep 0.6
     done
+     jq -s '{history: {columns: .[0].history.columns, data: ([.[].history.data] | add)}}' \
+        "$pages_file" > "$json_file"
+    rm -f "$pages_file"
 done
+
 
 echo "Готово. Файлы лежат в ${OUT_DIR}/"
 
