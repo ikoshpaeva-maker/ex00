@@ -1,0 +1,7 @@
+# DWH project: данные и база не хранятся в git
+dwh_project/data/
+dwh_project/db/
+*.csv
+*.parquet
+*.duckdb
+__pycache__/
